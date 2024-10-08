@@ -62,6 +62,7 @@
         </div>
     </div>
 </div>
+
 <div class="row g-0 mt-3">
     <div class="col-lg-12 col-xl-12 ps-lg-2 mb-3">
         <div class="card h-100">
@@ -82,7 +83,8 @@
                                 <th class="text-end text-white" scope="col">Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+
+                        <tbody id="printer_filter_data">
                             @if ($get_all_print_queues)
                             @foreach ($get_all_print_queues as $get_all_print_queues_data)
                             <tr class="align-middle">
@@ -115,6 +117,10 @@
                             @endif
                         </tbody>
                     </table>
+                    <div class="text-center w-100 p-5 loader_spinner" style="display: none;">
+                        <div class="spinner-border text-center text-primary" role="status">
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -133,19 +139,19 @@
             <div class="modal-body">
                 <div class="row">
                     @foreach($get_all_printers as $key => $printer)
-                        <div class="col-md-4">
-                            <div class="card p-3 mb-3 printer-card"
-                                data-key="{{ $key }}" data-printer-id="{{ $printer['printer_ip'] }}">
-                                <div class="form-check">
-                                    <i class="bi bi-printer"></i>
-                                    <label class="form-check-label" for="printer{{ $key }}">
-                                        <input type="hidden" id="{{ $printer['printer_ip'] }}" name="default_printer_id">
-                                        <span class="location">{{ $printer['location'] }}</span><br>
-                                        <span class="printer">{{ $printer['printer_ip'] }}</span>
-                                    </label>
-                                </div>
+                    <div class="col-md-4">
+                        <div class="card p-3 mb-3 printer-card"
+                            data-key="{{ $key }}" data-printer-id="{{ $printer['printer_ip'] }}">
+                            <div class="form-check">
+                                <i class="bi bi-printer"></i>
+                                <label class="form-check-label" for="printer{{ $key }}">
+                                    <input type="hidden" id="{{ $printer['printer_ip'] }}" name="default_printer_id">
+                                    <span class="location">{{ $printer['location'] }}</span><br>
+                                    <span class="printer">{{ $printer['printer_ip'] }}</span>
+                                </label>
                             </div>
                         </div>
+                    </div>
                     @endforeach
                 </div>
             </div>
@@ -161,6 +167,8 @@
     $(document).ready(function() {
         $('#printer_filter_submit').on('click', function(event) {
             event.preventDefault();
+            $('#printer_filter_data').hide();
+            $('.loader_spinner').show();
             var rec_date_time = $('input[name=rec_date_time]').val();
             var print_by_id = $('select[name=print_by_id]').val();
             var printer_status = $('select[name=printer_status]').val();
@@ -173,7 +181,9 @@
                     printer_status: printer_status,
                 },
                 success: function(response) {
-                    console.log(response);
+                    $("#printer_filter_data").html(response.data);
+                    $('#printer_filter_data').show();
+                    $('.loader_spinner').hide();
                 },
                 error: function(xhr, status, error) {
                     console.error(error);
@@ -182,16 +192,16 @@
         });
 
         $('.printer-card').on('click', function() {
-        var printerId = $(this).data('printer-id'); 
-        $('.printer-card').removeClass('selected');
-        $(this).addClass('selected');
-        $('input[name="default_printer_id"]').val(printerId);
+            var printerId = $(this).data('printer-id');
+            $('.printer-card').removeClass('selected');
+            $(this).addClass('selected');
+            $('input[name="default_printer_id"]').val(printerId);
 
-        $('#printerModal').on('hide.bs.modal', function() {
-        $('.printer-card').removeClass('selected');
-        $('input[name="default_printer_id"]').val('');
-    });
-    });
+            $('#printerModal').on('hide.bs.modal', function() {
+                $('.printer-card').removeClass('selected');
+                $('input[name="default_printer_id"]').val('');
+            });
+        });
 
     });
 </script>
