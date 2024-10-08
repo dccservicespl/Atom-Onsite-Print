@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminAuthController extends Controller
 {
-    public function admin_login(){
+    public function admin_login()
+    {
         return view('auth.login');
     }
 
     //LOGIN CODE
-    public function admin_login_action(Request $req){
+    public function admin_login_action(Request $req)
+    {
         $email = $req->email;
         $password = $req->password;
         // dd(array(
@@ -26,21 +28,25 @@ class AdminAuthController extends Controller
         }
     }
 
-    public function dashboard(){
-        $user_details = User::where('id',Auth::user()->id)->first();
+    public function dashboard()
+    {
+        $user_details = User::where('id', Auth::user()->id)->first();
         $get_all_print_queues = json_decode(printer_queues_data(), true)['data'];
-        return view('web.dashboard', compact('get_all_print_queues'));
+        $get_all_printers = json_decode(printer_list(),true)['data'];
+        return view('web.dashboard', compact('get_all_print_queues','get_all_printers'));
     }
 
     //LOGOUT CODE
-    public function logout(){
+    public function logout()
+    {
         session()->flush();
         Auth::logout();
         return redirect()->route('login');
     }
 
     //STORING DATA IN SESSION
-    public function get_session_data(Request $req){
+    public function get_session_data(Request $req)
+    {
         $req->session()->put('user_id', Auth::user()->id);
         $req->session()->put('user_name', Auth::user()->name);
         //GET ALL DATA FROM SESSION
