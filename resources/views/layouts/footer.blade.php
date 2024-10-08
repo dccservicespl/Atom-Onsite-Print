@@ -39,7 +39,7 @@
 <footer class="footer">
     <div class="row g-0 justify-content-between fs-10 mt-4 mb-3">
         <div class="col-12 col-sm-auto text-center">
-            
+
         </div>
         <div class="col-12 col-sm-auto text-center">
             <p class="mb-0 text-600">Thank you for creating with <span class="d-none d-sm-inline-block">|
@@ -123,6 +123,7 @@
 <script src="/assets/vendors/datatables.net-bs5/dataTables.bootstrap5.min.js"></script>
 <script src="/assets/vendors/datatables.net-fixedcolumns/dataTables.fixedColumns.min.js"></script>
 
+@yield('scripts')
 
 </body>
 

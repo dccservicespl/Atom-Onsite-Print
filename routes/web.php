@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\PrinterRequestController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,6 +18,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'auth'], function(){
     Route::get('dashboard', [AdminAuthController::class, 'dashboard'])->name('dashboard');
+    Route::get('/printer_filter_section', [PrinterRequestController::class,'printer_filter_section'])->name('printer_filter_section');
     Route::get('logout', [AdminAuthController::class, 'logout'])->name('logout');
 });
 

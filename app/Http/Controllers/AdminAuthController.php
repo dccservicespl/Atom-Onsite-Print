@@ -28,7 +28,8 @@ class AdminAuthController extends Controller
 
     public function dashboard(){
         $user_details = User::where('id',Auth::user()->id)->first();
-        return view('web.dashboard');
+        $get_all_print_queues = json_decode(printer_queues_data(), true)['data'];
+        return view('web.dashboard', compact('get_all_print_queues'));
     }
 
     //LOGOUT CODE
