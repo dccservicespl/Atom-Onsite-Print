@@ -111,7 +111,7 @@
                             @else
                             <tr class="align-middle">
                                 <td class="text-nowrap" colspan="6">
-                                    <p class="text-center text-danger"> {!! $get_all_print_queues !!} </p>
+                                    <p class="text-center text-danger h5 p-5"> No data found </p>
                                 </td>
                             </tr>
                             @endif
@@ -205,5 +205,116 @@
 
     });
 </script>
+<script>
+function generateStatusCode(status) {
+    let output = '';
+    if (status === 0) {
+        output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-danger">Pending</span>';
+    } else if (status === 1) {
+        output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-success">Success</span>';
+    } else {
+        output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-secondary">On Hold</span>';
+    }
+    return output;
+}
+
+function generateUserIdPassword() {
+    return JSON.stringify({
+        user_id: 'admindcc@yopmail.com',
+        password: '12345678'
+    });
+}
+
+let userCache = {};
+
+// Function to fetch user data based on user ID
+function getUserName(userId) {
+    return new Promise((resolve, reject) => {
+        if (userCache[userId]) {
+            resolve(userCache[userId]);
+        } else {
+            $.ajax({
+                url: `{{ env('API_URL') }}/api/get_all_users?user_id=${userId}`,
+                type: 'POST',
+                data: generateUserIdPassword(),
+                contentType: 'application/json',
+                success: function(response) {
+                    const userName = response.data[0].name;
+                    userCache[userId] = userName;
+                    resolve(userName);
+                },
+                error: function(error) {
+                    console.error("Error fetching user data:", error);
+                    resolve("Unknown User");
+                }
+            });
+        }
+    });
+}
+
+// Function to fetch printer queue data
+function fetchPrinterQueueData() {
+    let recDateTime = "";
+    let printById = "";  
+    let printStatus = "";
+
+    $.ajax({
+        url: `{{ env('API_URL') }}/api/printer_queues_data?rec_date_time=${recDateTime}&print_by_id=${printById}&print_status=${printStatus}`,
+        type: 'POST',
+        data: generateUserIdPassword(),
+        contentType: 'application/json',
+        success: function(response) {
+            let data = response.data;
+
+            // Clear the existing table rows
+            $('#printer_filter_data').empty();
+
+            // Check if data is available
+            if (data && data.length > 0) {
+                // Loop through data and append rows
+                data.forEach(item => {
+                    getUserName(item.print_by_id).then(userName => {
+                        let row = `
+                            <tr class="align-middle">
+                                <td class="text-nowrap">${new Date(item.rec_date_time).toLocaleDateString()}</td>
+                                <td class="text-nowrap">${item.print_file}</td>
+                                <td class="text-nowrap">${item.page_no}</td>
+                                <td class="text-nowrap">
+                                    <div class="d-flex align-items-center">
+                                        <div class="ms-2">${userName}</div>
+                                    </div>
+                                </td>
+                                <td>${generateStatusCode(item.print_status)}</td>
+                                <td class="text-end">
+                                    <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
+                                       data-bs-placement="top" title="Print Now"
+                                       download="Print Now" data-bs-toggle="modal" data-bs-target="#printerModal">
+                                       <i class="bi bi-printer"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                        $('#printer_filter_data').append(row);
+                    });
+                });
+            } else {
+                $('#printer_filter_data').html(`
+                    <tr class="align-middle">
+                        <td class="text-nowrap" colspan="6">
+                            <p class="text-center text-danger h5 p-5"> No data found </p>
+                        </td>
+                    </tr>
+                `);
+            }
+        },
+        error: function(error) {
+            console.error("Error fetching printer queue data:", error);
+        }
+    });
+}
+
+setInterval(fetchPrinterQueueData, 5000);
+</script>
+
 @endsection
 @endsection
