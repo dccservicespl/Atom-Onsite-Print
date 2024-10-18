@@ -55,7 +55,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button class="btn btn-outline-primary form-control" id="printer_filter_submit" type="submit">Filter</button>
+                        <button class="btn btn-outline-primary form-control" id="printer_filter_submit" type="submit"><i class="bi bi-funnel"></i> Filter</button>
                     </div>
                 </div>
             </div>
@@ -87,31 +87,31 @@
                         <tbody id="printer_filter_data">
                             @if ($get_all_print_queues)
                             @foreach ($get_all_print_queues as $get_all_print_queues_data)
-                            <tr class="align-middle">
-                                <td class="text-nowrap">{{ date('m-d-Y', strtotime($get_all_print_queues_data['rec_date_time'])) }}</td>
-                                <td class="text-nowrap">{{ $get_all_print_queues_data['print_file'] }}</td>
-                                <td class="text-nowrap">{{ $get_all_print_queues_data['page_no'] }}</td>
-                                <td class="text-nowrap">
-                                    <div class="d-flex align-items-center">
-                                        <div class="ms-2">{!! json_decode(get_users($get_all_print_queues_data['print_by_id']), true)['data'][0]['name'] !!}</div>
-                                    </div>
-                                </td>
-                                <td>
-                                    {!! generateStatusCode($get_all_print_queues_data['print_status']) !!}
-                                </td>
-                                <td class="text-end">
-                                    <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
-                                        data-bs-placement="top" title="Print Now"
-                                        download="Print Now" data-bs-toggle="modal" data-bs-target="#printerModal">
-                                        <i class="bi bi-printer"></i>
-                                    </a>
-                                </td>
-                            </tr>
+                                <tr class="align-middle">
+                                    <td class="text-nowrap">{{ date('m-d-Y', strtotime($get_all_print_queues_data['rec_date_time'])) }}</td>
+                                    <td class="text-nowrap">{{ Str::title($get_all_print_queues_data['print_file']);  }}</td>
+                                    <td class="text-nowrap">{{ $get_all_print_queues_data['page_no'] }}</td>
+                                    <td class="text-nowrap">
+                                        <div class="d-flex align-items-center">
+                                            <div class="ms-2">{!! json_decode(get_users($get_all_print_queues_data['print_by_id']), true)['data'][0]['name'] !!}</div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {!! generateStatusCode($get_all_print_queues_data['print_status']) !!}
+                                    </td>
+                                    <td class="text-end">
+                                        <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
+                                            data-bs-placement="top" title="Print Now"
+                                            download="Print Now" data-bs-toggle="modal" data-bs-target="#printerModal">
+                                            <i class="bi bi-printer"></i>
+                                        </a>
+                                    </td>
+                                </tr>
                             @endforeach
                             @else
                             <tr class="align-middle">
                                 <td class="text-nowrap" colspan="6">
-                                    <p class="text-center text-danger"> {!! $get_all_print_queues !!} </p>
+                                    <p class="text-center text-danger h5 p-5"> No Data Found! </p>
                                 </td>
                             </tr>
                             @endif
@@ -156,7 +156,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Print</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"> <i class="bi bi-printer mr-2 h5 text-white"></i> Print</button>
             </div>
         </div>
     </div>
