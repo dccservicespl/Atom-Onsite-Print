@@ -55,7 +55,7 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <button class="btn btn-outline-primary form-control" id="printer_filter_submit" type="submit">Filter</button>
+                        <button class="btn btn-outline-primary form-control" id="printer_filter_submit" type="submit"><i class="bi bi-funnel"></i> Filter</button>
                     </div>
                 </div>
             </div>
@@ -89,7 +89,7 @@
                             @foreach ($get_all_print_queues as $get_all_print_queues_data)
                             <tr class="align-middle">
                                 <td class="text-nowrap">{{ date('m-d-Y', strtotime($get_all_print_queues_data['rec_date_time'])) }}</td>
-                                <td class="text-nowrap">{{ $get_all_print_queues_data['print_file'] }}</td>
+                                <td class="text-nowrap">{{ Str::title($get_all_print_queues_data['print_file']); }}</td>
                                 <td class="text-nowrap">{{ $get_all_print_queues_data['page_no'] }}</td>
                                 <td class="text-nowrap">
                                     <div class="d-flex align-items-center">
@@ -156,7 +156,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Print</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"> <i class="bi bi-printer mr-2 h5 text-white"></i> Print</button>
             </div>
         </div>
     </div>
