@@ -102,7 +102,7 @@
                                 <td class="text-end">
                                     <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
                                         data-bs-placement="top" title="Print Now"
-                                        download="Print Now" data-bs-toggle="modal" data-bs-target="#printerModal">
+                                        download="Print Now" data-print-file="{{ $get_all_print_queues_data['print_file'] }}" data-bs-toggle="modal" data-bs-target="#printerModal">
                                         <i class="bi bi-printer"></i>
                                     </a>
                                 </td>
@@ -156,7 +156,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"> <i class="bi bi-printer mr-2 h5 text-white"></i> Print</button>
+                <button type="button" class="btn btn-primary" id="printButton" data-bs-dismiss="modal"> <i class="bi bi-printer mr-2 h5 text-white"></i> Print</button>
             </div>
         </div>
     </div>
@@ -165,116 +165,97 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('#printer_filter_submit').on('click', function(event) {
-            event.preventDefault();
-            $('#printer_filter_data').hide();
-            $('.loader_spinner').show();
-            var rec_date_time = $('input[name=rec_date_time]').val();
-            var print_by_id = $('select[name=print_by_id]').val();
-            var printer_status = $('select[name=printer_status]').val();
-            $.ajax({
-                url: '/printer_filter_section',
-                type: 'GET',
-                data: {
-                    rec_date_time: rec_date_time,
-                    print_by_id: print_by_id,
-                    printer_status: printer_status,
-                },
-                success: function(response) {
-                    $("#printer_filter_data").html(response.data);
-                    $('#printer_filter_data').show();
-                    $('.loader_spinner').hide();
-                },
-                error: function(xhr, status, error) {
-                    console.error(error);
-                }
-            });
+        $('a[data-bs-target="#printerModal"]').on('click', function() {
+            var printFile = $(this).data('print-file');
+            $('#printButton').data('print-file', printFile);
         });
 
-        $('.printer-card').on('click', function() {
-            var printerId = $(this).data('printer-id');
-            $('.printer-card').removeClass('selected');
-            $(this).addClass('selected');
-            $('input[name="default_printer_id"]').val(printerId);
-
-            $('#printerModal').on('hide.bs.modal', function() {
-                $('.printer-card').removeClass('selected');
-                $('input[name="default_printer_id"]').val('');
-            });
+        $('#printButton').on('click', function() {
+            var printFile = $(this).data('print-file');
+            if (printFile == 'Store Number Label') {
+                window.location.href = "{{route('store_number_label_print')}}";
+            } else if (printFile == 'Final Store Label') {
+                window.location.href = "{{route('final_store_label_print')}}";
+            } else {
+                alert('No printer selected');
+            }
         });
 
+        $('#printerModal').on('hidden.bs.modal', function() {
+            $('#printButton').removeData('print-file');
+        });
     });
 </script>
 <script>
-function generateStatusCode(status) {
-    let output = '';
-    if (status === 0) {
-        output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-danger">Pending</span>';
-    } else if (status === 1) {
-        output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-success">Success</span>';
-    } else {
-        output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-secondary">On Hold</span>';
-    }
-    return output;
-}
-
-function generateUserIdPassword() {
-    return JSON.stringify({
-        user_id: 'admindcc@yopmail.com',
-        password: '12345678'
-    });
-}
-
-let userCache = {};
-
-// Function to fetch user data based on user ID
-function getUserName(userId) {
-    return new Promise((resolve, reject) => {
-        if (userCache[userId]) {
-            resolve(userCache[userId]);
+    function generateStatusCode(status) {
+        let output = '';
+        if (status === 0) {
+            output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-danger">Pending</span>';
+        } else if (status === 1) {
+            output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-success">Success</span>';
         } else {
-            $.ajax({
-                url: `{{ env('API_URL') }}/api/get_all_users?user_id=${userId}`,
-                type: 'POST',
-                data: generateUserIdPassword(),
-                contentType: 'application/json',
-                success: function(response) {
-                    const userName = response.data[0].name;
-                    userCache[userId] = userName;
-                    resolve(userName);
-                },
-                error: function(error) {
-                    console.error("Error fetching user data:", error);
-                    resolve("Unknown User");
-                }
-            });
+            output = '<span class="badge badge rounded-pill d-block p-2 badge-subtle-secondary">On Hold</span>';
         }
-    });
-}
+        return output;
+    }
 
-// Function to fetch printer queue data
-function fetchPrinterQueueData() {
-    let recDateTime = "";
-    let printById = "";  
-    let printStatus = "";
+    function generateUserIdPassword() {
+        return JSON.stringify({
+            user_id: 'admindcc@yopmail.com',
+            password: '12345678'
+        });
+    }
 
-    $.ajax({
-        url: `{{ env('API_URL') }}/api/printer_queues_data?rec_date_time=${recDateTime}&print_by_id=${printById}&print_status=${printStatus}`,
-        type: 'POST',
-        data: generateUserIdPassword(),
-        contentType: 'application/json',
-        success: function(response) {
-            let data = response.data;
+    let userCache = {};
 
-            // Clear the existing table rows
-            $('#printer_filter_data').empty();
+    // Function to fetch user data based on user ID
+    function getUserName(userId) {
+        return new Promise((resolve, reject) => {
+            if (userCache[userId]) {
+                resolve(userCache[userId]);
+            } else {
+                $.ajax({
+                    url: `{{ env('API_URL') }}/api/get_all_users?user_id=${userId}`,
+                    type: 'POST',
+                    data: generateUserIdPassword(),
+                    contentType: 'application/json',
+                    success: function(response) {
+                        const userName = response.data[0].name;
+                        userCache[userId] = userName;
+                        resolve(userName);
+                    },
+                    error: function(error) {
+                        console.error("Error fetching user data:", error);
+                        resolve("Unknown User");
+                    }
+                });
+            }
+        });
+    }
 
-            // Check if data is available
-            if (data && data.length > 0) {
-                // Loop through data and append rows
-                data.forEach(item => {
-                    getUserName(item.print_by_id).then(userName => {
-                        let row = `
+    // Function to fetch printer queue data
+    function fetchPrinterQueueData() {
+        let recDateTime = "";
+        let printById = "";
+        let printStatus = "";
+
+        $.ajax({
+            url: `{{ env('API_URL') }}/api/printer_queues_data?rec_date_time=${recDateTime}&print_by_id=${printById}&print_status=${printStatus}`,
+            type: 'POST',
+            data: generateUserIdPassword(),
+            contentType: 'application/json',
+            success: function(response) {
+                let data = response.data;
+
+                // Clear the existing table rows
+                $('#printer_filter_data').empty();
+
+                // Check if data is available
+                if (data && data.length > 0) {
+                    // Loop through data and append rows
+                    data.forEach(item => {
+                        getUserName(item.print_by_id).then(userName => {
+                            let row = `
                             <tr class="align-middle">
                                 <td class="text-nowrap">${new Date(item.rec_date_time).toLocaleDateString()}</td>
                                 <td class="text-nowrap">${item.print_file}</td>
@@ -294,26 +275,72 @@ function fetchPrinterQueueData() {
                                 </td>
                             </tr>
                         `;
-                        $('#printer_filter_data').append(row);
+                            $('#printer_filter_data').append(row);
+                        });
                     });
-                });
-            } else {
-                $('#printer_filter_data').html(`
+                } else {
+                    $('#printer_filter_data').html(`
                     <tr class="align-middle">
                         <td class="text-nowrap" colspan="6">
                             <p class="text-center text-danger h5 p-5"> No data found </p>
                         </td>
                     </tr>
                 `);
+                }
+            },
+            error: function(error) {
+                console.error("Error fetching printer queue data:", error);
             }
-        },
-        error: function(error) {
-            console.error("Error fetching printer queue data:", error);
-        }
-    });
-}
+        });
+    }
 
-setInterval(fetchPrinterQueueData, 5000);
+    fetchInterval = setInterval(fetchPrinterQueueData, 5000);
+    fetchPrinterQueueData();
+
+    $('#printer_filter_submit').on('click', function(event) {
+        event.preventDefault();
+        isFilterActive = true;
+        $('#printer_filter_data').hide();
+        $('.loader_spinner').show();
+        var rec_date_time = $('input[name=rec_date_time]').val();
+        var print_by_id = $('select[name=print_by_id]').val();
+        var printer_status = $('select[name=printer_status]').val();
+
+        // Stop fetching data during filtering
+        clearInterval(fetchInterval);
+
+        $.ajax({
+            url: '/printer_filter_section',
+            type: 'GET',
+            data: {
+                rec_date_time: rec_date_time,
+                print_by_id: print_by_id,
+                printer_status: printer_status,
+            },
+            success: function(response) {
+                $("#printer_filter_data").html(response.data);
+                $('#printer_filter_data').show();
+                $('.loader_spinner').hide();
+                isFilterActive = false;
+            },
+            error: function(xhr, status, error) {
+                console.error(error);
+                isFilterActive = false;
+            }
+        });
+    });
+
+    $('.printer-card').on('click', function() {
+        var printerId = $(this).data('printer-id');
+        $('.printer-card').removeClass('selected');
+        $(this).addClass('selected');
+        $('input[name="default_printer_id"]').val(printerId);
+
+        $('#printerModal').on('hide.bs.modal', function() {
+            $('.printer-card').removeClass('selected');
+            $('input[name="default_printer_id"]').val('');
+        });
+    });
 </script>
 
 @endsection

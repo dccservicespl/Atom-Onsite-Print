@@ -27,15 +27,19 @@ class ApiReadController extends Controller
                             ^A0R,550,600
                             ^FD{$store_details}^FS
                             ^XZ";
-                ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
+                $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
+
+                return response()->json([
+                    'success' => 'Labels printed successfully',
+                    'print_response' => $print_response,
+                    'header_id' => $header_id
+                ], 200);
             } else {
                 return response()->json(['error' => "No Printer found."]);
             }
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
-        return response()->json(['success' => 'Labels printed successfully'], 200);
-        json_decode(update_status($header_id), true);
     }
 
     public function final_store_label_print(Request $request)
@@ -65,16 +69,19 @@ class ApiReadController extends Controller
                                     ^FD" . $box_count . "^FS
 
                                     ^XZ";
-                    ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
+                    $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
+                    return response()->json([
+                        'success' => 'Labels printed successfully',
+                        'print_response' => $print_response,
+                        'header_id' => $header_id,
+                        'store_id' => $store_id,
+                    ], 200);
                 }
             } else {
                 return response()->json(['error' => "No Printer found."]);
             }
-            json_decode(update_store_process_status($header_id, $store_id), true);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()]);
         }
-        return response()->json(['success' => 'Labels printed successfully'], 200);
-        json_decode(update_status($header_id), true);
     }
 }
