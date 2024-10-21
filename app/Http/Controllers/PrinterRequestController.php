@@ -35,7 +35,7 @@ class PrinterRequestController extends Controller
                         <tr>';
             }
         }else{
-            $html = '<tr><td colspan="6"><p class="text-danger text-center h5 p-5"> Data not found!</p></td></tr>';
+            $html = '<tr><td colspan="6"><p class="text-danger text-center h5 p-5">No data found!</p></td></tr>';
 
         }
         return response()->json([
