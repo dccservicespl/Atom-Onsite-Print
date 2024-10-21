@@ -30,7 +30,9 @@
             "app/Helpers/FlashMessageHelper.php",
             "app/Helpers/WhookHelper.php",
             "app/Helpers/Html_helper.php",
-            "app/Helpers/ApiReadHelper.php"
+            "app/Helpers/ApiReadHelper.php",
+            "app/Helpers/ZplPrinterPrintHelper.php",
+            "app/Helpers/ZplPrinter.php"
         ]
     },
     "autoload-dev": {
