@@ -31,7 +31,18 @@
         cursor: pointer;
     }
 </style>
+<!-- Loader Element (Initially Hidden) -->
+<div id="page-loader" class="d-none" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); z-index: 9999;">
+    <div class="d-flex justify-content-center align-items-center h-100">
+        <div class="spinner-border text-primary" role="status">
+        </div>
+    </div>
+</div>
+
 <div class="row g-0 mt-3">
+    <div id="flash-message-area">
+        {!! flashMessage() !!}
+    </div>
     <div class="col-lg-12 col-xl-12 ps-lg-2 mb-3">
         <div class="card h-100">
             <div class="card-body pb-5 pt-5">
@@ -102,7 +113,7 @@
                                 <td class="text-end">
                                     <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
                                         data-bs-placement="top" title="Print Now"
-                                        download="Print Now" data-print-file="{{ $get_all_print_queues_data['print_file'] }}" data-bs-toggle="modal" data-bs-target="#printerModal">
+                                        download="Print Now" id="printModal" data-printer-queues-id="{{$get_all_print_queues_data['id']}}" data-box-no="{{$get_all_print_queues_data['page_no']}}" data-printer-id="{{ $get_all_print_queues_data['printer_ip_id'] }}" data-store-id="{{ $get_all_print_queues_data['store_id'] }}" data-name="{{ $get_all_print_queues_data['print_file'] }}" data-header-id="{{ $get_all_print_queues_data['order_header_id'] }}" data-bs-toggle="modal" data-bs-target="#printerModal">
                                         <i class="bi bi-printer"></i>
                                     </a>
                                 </td>
@@ -147,7 +158,7 @@
                                 <label class="form-check-label" for="printer{{ $key }}">
                                     <input type="hidden" id="{{ $printer['printer_ip'] }}" name="default_printer_id">
                                     <span class="location">{{ $printer['location'] }}</span><br>
-                                    <span class="printer">{{ $printer['printer_ip'] }}</span>
+                                    <span class="printer" data-port="{{$printer['port']}}">{{ $printer['printer_ip'] }}</span>
                                 </label>
                             </div>
                         </div>
@@ -165,26 +176,112 @@
 @section('scripts')
 <script>
     $(document).ready(function() {
-        $('a[data-bs-target="#printerModal"]').on('click', function() {
-            var printFile = $(this).data('print-file');
-            $('#printButton').data('print-file', printFile);
+        var selectedPrinterPort;
+
+        $(document).on('click', '.printer-card', function() {
+            selectedPrinterPort = $(this).find('.printer').data('port');
+            // alert(selectedPrinterPort);
+            $('#printButton').attr('data-port', selectedPrinterPort);
+
+        });
+
+        $(document).on('click', '#printModal', function() {
+            var printFile = $(this).data('name');  
+            var header_id = $(this).data('header-id');  
+            var store_id = $(this).data('store-id');  
+            var printer_id = $(this).data('printer-id');  
+            var box_no = $(this).data('box-no');  
+            var printer_queues_id = $(this).data('printer-queues-id');  
+            
+            $('#printButton').data('name', printFile);
+            $('#printButton').data('header-id', header_id);
+            $('#printButton').data('store-id', store_id);
+            $('#printButton').data('printer-id', printer_id);
+            $('#printButton').data('box-no', box_no);
+            $('#printButton').data('printer-queues-id', printer_queues_id);
+
         });
 
         $('#printButton').on('click', function() {
-            var printFile = $(this).data('print-file');
-            if (printFile == 'Store Number Label') {
-                window.location.href = "{{route('store_number_label_print')}}";
-            } else if (printFile == 'Final Store Label') {
-                window.location.href = "{{route('final_store_label_print')}}";
+            var printFile = $(this).data('name');
+            var header_id = $(this).data('header-id');
+            var store_id = $(this).data('store-id');  
+            var printer_id = $(this).data('printer-id');  
+            var port = $(this).data('port');  
+            var box_no = $(this).data('box-no');  
+            var printer_queues_id = $(this).data('printer-queues-id');  
+
+            if (printFile === 'Store Number Label') {
+                $.ajax({
+                   url: "{{route('store_number_label')}}",
+                   data:{
+                        header_id:header_id,
+                        printer_id:printer_id,
+                        port:port,
+                        printer_queues_id:printer_queues_id
+                   },
+                    beforeSend: function() {
+                        // Show the loader
+                        $('#page-loader').removeClass('d-none');
+                    },
+                   success:function(res){
+                    if(res.success){
+                        $('#flash-message-area').load(window.location.href + " #flash-message-area");
+                    } else if(res.error){
+                        $('#flash-message-area').load(window.location.href + " #flash-message-area");   
+                    }
+                   },
+                    complete: function() {
+                        // Hide the loader
+                        $('#page-loader').addClass('d-none');
+                    },
+                    error: function() {
+                        // Hide the loader
+                        $('#page-loader').addClass('d-none');
+                    }
+                });
+            } else if (printFile === 'Final Store Label') {
+                $.ajax({
+                   url: "{{route('final_store_label')}}",
+                   data:{
+                        printer_id:printer_id,
+                        port:port,
+                        box_no:box_no,
+                        store_id:store_id,
+                        header_id:header_id,
+                        printer_queues_id:printer_queues_id
+                   },
+                    beforeSend: function() {
+                        // Show the loader
+                        $('#page-loader').removeClass('d-none');
+                    },
+                   success:function(res){
+                    if(res.success){
+                        $('#flash-message-area').load(window.location.href + " #flash-message-area");
+                    } else if(res.error){
+                        $('#flash-message-area').load(window.location.href + " #flash-message-area");   
+                    }
+                   },
+                    complete: function() {
+                        // Hide the loader
+                        $('#page-loader').addClass('d-none');
+                    },
+                    error: function() {
+                        // Hide the loader
+                        $('#page-loader').addClass('d-none');
+                    }
+                });
             } else {
-                alert('No printer selected');
+                console.log('No valid print queue selected');
             }
         });
 
         $('#printerModal').on('hidden.bs.modal', function() {
-            $('#printButton').removeData('print-file');
+            $('#printButton').removeData('name'); 
         });
     });
+
+
 </script>
 <script>
     function generateStatusCode(status) {
@@ -269,7 +366,7 @@
                                 <td class="text-end">
                                     <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
                                        data-bs-placement="top" title="Print Now"
-                                       download="Print Now" data-bs-toggle="modal" data-bs-target="#printerModal">
+                                       download="Print Now" data-printer-queues-id="${item.id}" data-box-no="${item.page_no}" data-printer-id="${item.printer_ip_id}"" data-store-id="${item.store_id}" id="printModal" data-header-id="${item.order_header_id}" data-name="${item.print_file}" data-bs-toggle="modal" data-bs-target="#printerModal">
                                        <i class="bi bi-printer"></i>
                                     </a>
                                 </td>
