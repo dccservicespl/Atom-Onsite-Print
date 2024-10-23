@@ -51,6 +51,7 @@ class ApiReadController extends Controller
         $get_inv_date = $request->input('get_inv_date');
         $printer_ip = $request->input('printer_ip');
         $port = $request->input('port');
+        
 
         try {
             if ($printer_ip) {
