@@ -48,7 +48,7 @@
             <div class="row min-vh-100 bg-100">
                 <div class="col-6 d-none d-lg-block position-relative">
                     <div class="bg-holder"
-                        style="background-image:url(/assets/img/generic/14.jpg);background-position: 50% 20%;">
+                        style="background-image:url(/assets/img/office/atom_banana_office_image.jpg);background-position: 50% 20%;">
                     </div>
                 </div>
                 <div class="col-sm-10 col-md-6 px-sm-0 align-self-center mx-auto py-5">
@@ -68,6 +68,9 @@
                                 @endif
                             </div>
                             <div class="card">
+                                <a href="" class="text-center p-2">
+                                    <img class="text-center" src="https://atombanana.com/wp-content/themes/atom_banana/images/logo.png" alt="" style="height: 100px">
+                                </a>
                                 <div class="card-header bg-circle-shape bg-shape text-center p-2">
                                     <a class="font-sans-serif fw-bolder fs-5 z-1 position-relative link-light text-decoration-none"
                                         href="" data-bs-theme="light">{{ env('APP_NAME') }}</a>
