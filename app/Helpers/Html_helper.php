@@ -4,18 +4,16 @@
         $output = '';
         if ($status === 0) {
             $output .= '
-                <span class="badge badge rounded-pill d-block p-2 badge-subtle-danger">Pending
-
-                </span>
+                <span class="badge badge rounded-pill d-block p-2 badge-subtle-danger border border-danger">Pending</span>
             ';
         }elseif($status === 1){
             $output .= '
-                <span class="badge badge rounded-pill d-block p-2 badge-subtle-success">Success
+                <span class="badge badge rounded-pill d-block p-2 badge-subtle-success border border-success">Success
                 </span>
             ';
         }else{
             $output .='
-                <span class="badge badge rounded-pill d-block p-2 badge-subtle-secondary">On Hold
+                <span class="badge badge rounded-pill d-block p-2 badge-subtle-secondary border border-secondary">On Hold
                 </span>
             ';
         }

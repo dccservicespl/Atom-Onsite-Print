@@ -53,7 +53,7 @@ class PrinterRequestController extends Controller
         $printer_queues_id = $request->input('printer_queues_id');
 
         $result = json_decode(store_number_print_content($header_id));
-                
+
         try {
             if ($printer_id) {
                 foreach($result->data as $value){
@@ -87,7 +87,8 @@ class PrinterRequestController extends Controller
         $header_id = $request->input('header_id');
         $store_id = $request->input('store_id');
         $num_of_boxes = $request->input('box_no');
-        $printer_id = $request->input('printer_id');
+        // $printer_id = $request->input('printer_id');
+        $printer_id = "192.168.254.254";
         $port = $request->input('port');
         $printer_queues_id = $request->input('printer_queues_id');
 
@@ -108,7 +109,6 @@ class PrinterRequestController extends Controller
                                     ^FO10,900
                                     ^A0R,150,150
                                     ^FD" . $box_count . "^FS
-
                                     ^XZ";
                     $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_id, $port);
                 }
