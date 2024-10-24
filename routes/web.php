@@ -20,6 +20,10 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('dashboard', [AdminAuthController::class, 'dashboard'])->name('dashboard');
     Route::get('/printer_filter_section', [PrinterRequestController::class,'printer_filter_section'])->name('printer_filter_section');
     Route::get('logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+    Route::get('/store_number_label', [PrinterRequestController::class,'store_number_label'])->name('store_number_label');
+    Route::get('/final_store_label', [PrinterRequestController::class,'final_store_label'])->name('final_store_label');
+
 });
 
 Route::group(['middleware' => 'guest'], function () {
