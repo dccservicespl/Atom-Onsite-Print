@@ -50,7 +50,7 @@ class ApiReadController extends Controller
         $num_of_boxes = $request->input('num_of_boxes');
         $get_inv_date = $request->input('get_inv_date');
         $printer_ip = $request->input('printer_ip');
-        $port = $request->input('port');
+        $port = $request->input('port'); 
 
         try {
             if ($printer_ip) {
