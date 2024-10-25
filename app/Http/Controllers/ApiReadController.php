@@ -108,13 +108,13 @@ class ApiReadController extends Controller
 
                                     ^XZ";
                     $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
-                    return response()->json([
-                        'success' => 'Labels printed successfully',
-                        'print_response' => $print_response,
-                        'header_id' => $header_id,
-                        'store_id' => $store_id,
-                    ], 200);
                 }
+                return response()->json([
+                    'success' => 'Labels printed successfully',
+                    //'print_response' => $print_response,
+                    'header_id' => $header_id,
+                    'store_id' => $store_id,
+                ], 200);
             } else {
                 return response()->json(['error' => "No Printer found."]);
             }

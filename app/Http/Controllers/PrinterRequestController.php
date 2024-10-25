@@ -67,13 +67,13 @@ class PrinterRequestController extends Controller
                                 ^XZ";
                     $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
                     session()->flash('success', 'Labels printed successfully.');
-                    json_decode(printer_status_update($printer_queues_id));
-                    return response()->json([
-                        'success' => 'Labels printed successfully',
-                        'print_response' => $print_response,
-                        'header_id' => $header_id
-                    ], 200);
                 }
+                json_decode(printer_status_update($printer_queues_id));
+                return response()->json([
+                    'success' => 'Labels printed successfully',
+                    'print_response' => $print_response,
+                    'header_id' => $header_id
+                ], 200);
             } else {
                 session()->flash('error', 'No Printer found.');
                 return response()->json(['error' => "No Printer found."]);
