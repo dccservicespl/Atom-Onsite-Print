@@ -158,7 +158,7 @@
                                 <label class="form-check-label" for="printer{{ $key }}">
                                     <input type="hidden" id="{{ $printer['printer_ip'] }}" name="default_printer_id">
                                     <span class="location">{{ $printer['location'] }}</span><br>
-                                    <span class="printer" data-port="{{$printer['port']}}">{{ $printer['printer_ip'] }}</span>
+                                    <span class="printer" data-port="{{$printer['port']}}" data-printer-ip="{{$printer['printer_ip']}}">{{ $printer['printer_ip'] }}</span>
                                 </label>
                             </div>
                         </div>
@@ -180,8 +180,10 @@
 
         $(document).on('click', '.printer-card', function() {
             selectedPrinterPort = $(this).find('.printer').data('port');
-            // alert(selectedPrinterPort);
+            selectedPrinterIp = $(this).find('.printer').data('printer-ip');
+            // alert(selectedPrinterIp);
             $('#printButton').attr('data-port', selectedPrinterPort);
+            $('#printButton').attr('data-printer-ip', selectedPrinterIp);
 
         });
 
@@ -208,39 +210,31 @@
             var store_id = $(this).data('store-id');  
             var printer_id = $(this).data('printer-id');  
             var port = $(this).data('port');  
+            var printer_ip = $(this).data('printer-ip');  
             var box_no = $(this).data('box-no');  
             var printer_queues_id = $(this).data('printer-queues-id');  
 
             if (printFile === 'Store Number Label') {
+                $('#page-loader').removeClass('d-none');
                 $.ajax({
                    url: "{{route('store_number_label')}}",
                    data:{
                         header_id:header_id,
-                        printer_id:printer_id,
                         port:port,
-                        printer_queues_id:printer_queues_id
+                        printer_queues_id:printer_queues_id,
+                        printer_ip:printer_ip
                    },
-                    beforeSend: function() {
-                        // Show the loader
-                        $('#page-loader').removeClass('d-none');
-                    },
                    success:function(res){
                     if(res.success){
                         $('#flash-message-area').load(window.location.href + " #flash-message-area");
                     } else if(res.error){
                         $('#flash-message-area').load(window.location.href + " #flash-message-area");   
                     }
-                   },
-                    complete: function() {
-                        // Hide the loader
-                        $('#page-loader').addClass('d-none');
-                    },
-                    error: function() {
-                        // Hide the loader
-                        $('#page-loader').addClass('d-none');
-                    }
+                    $('#page-loader').addClass('d-none');
+                   }
                 });
             } else if (printFile === 'Final Store Label') {
+                $('#page-loader').removeClass('d-none');
                 $.ajax({
                    url: "{{route('final_store_label')}}",
                    data:{
@@ -249,27 +243,17 @@
                         box_no:box_no,
                         store_id:store_id,
                         header_id:header_id,
-                        printer_queues_id:printer_queues_id
+                        printer_queues_id:printer_queues_id,
+                        printer_ip:printer_ip
                    },
-                    beforeSend: function() {
-                        // Show the loader
-                        $('#page-loader').removeClass('d-none');
-                    },
                    success:function(res){
                     if(res.success){
                         $('#flash-message-area').load(window.location.href + " #flash-message-area");
                     } else if(res.error){
                         $('#flash-message-area').load(window.location.href + " #flash-message-area");   
                     }
-                   },
-                    complete: function() {
-                        // Hide the loader
-                        $('#page-loader').addClass('d-none');
-                    },
-                    error: function() {
-                        // Hide the loader
-                        $('#page-loader').addClass('d-none');
-                    }
+                    $('#page-loader').addClass('d-none');
+                   }
                 });
             } else {
                 console.log('No valid print queue selected');
@@ -391,20 +375,16 @@
         });
     }
 
-    fetchInterval = setInterval(fetchPrinterQueueData, 5000);
-    fetchPrinterQueueData();
+    // fetchInterval = setInterval(fetchPrinterQueueData, 5000);
+    // fetchPrinterQueueData();
 
     $('#printer_filter_submit').on('click', function(event) {
         event.preventDefault();
-        isFilterActive = true;
         $('#printer_filter_data').hide();
         $('.loader_spinner').show();
         var rec_date_time = $('input[name=rec_date_time]').val();
         var print_by_id = $('select[name=print_by_id]').val();
         var printer_status = $('select[name=printer_status]').val();
-
-        // Stop fetching data during filtering
-        clearInterval(fetchInterval);
 
         $.ajax({
             url: '/printer_filter_section',
@@ -418,11 +398,9 @@
                 $("#printer_filter_data").html(response.data);
                 $('#printer_filter_data').show();
                 $('.loader_spinner').hide();
-                isFilterActive = false;
             },
             error: function(xhr, status, error) {
                 console.error(error);
-                isFilterActive = false;
             }
         });
     });
