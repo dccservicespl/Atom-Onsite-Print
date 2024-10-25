@@ -88,7 +88,7 @@ class ApiReadController extends Controller
         $num_of_boxes = $request->input('num_of_boxes');
         $get_inv_date = $request->input('get_inv_date');
         $printer_ip = $request->input('printer_ip');
-        $port = $request->input('port'); 
+        $port = $request->input('port');
 
         try {
             if ($printer_ip) {
@@ -130,7 +130,7 @@ class ApiReadController extends Controller
         //         $num_of_boxes = $request->input('num_of_boxes');
         //         $get_inv_date = $request->input('get_inv_date');
         //         $printer_ip = $request->input('printer_ip');
-        //         $port = $request->input('port');        
+        //         $port = $request->input('port');
 
         //         if ($printer_ip) {
         //             $print_response = '';
@@ -147,7 +147,7 @@ class ApiReadController extends Controller
         //                                 ^FO10,900
         //                                 ^A0R,150,150
         //                                 ^FD" . $box_count . "^FS
-    
+
         //                                 ^XZ";
         //                 $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
         //             }
