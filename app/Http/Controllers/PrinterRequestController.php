@@ -48,14 +48,15 @@ class PrinterRequestController extends Controller
 
     public function store_number_label(Request $request){
         $header_id = $request->input('header_id');
-        $printer_id = $request->input('printer_id');
+        // $printer_id = $request->input('printer_id');
+        $printer_ip = $request->input('printer_ip');
         $port = $request->input('port');
         $printer_queues_id = $request->input('printer_queues_id');
 
         $result = json_decode(store_number_print_content($header_id));
 
         try {
-            if ($printer_id) {
+            if ($printer_ip) {
                 foreach($result->data as $value){
                     $zpl_message = "^XA
                                 ^PW600
@@ -64,7 +65,7 @@ class PrinterRequestController extends Controller
                                 ^A0R,550,600
                                 ^FD{$value->store_code}^FS
                                 ^XZ";
-                    $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_id, $port);
+                    $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
                     session()->flash('success', 'Labels printed successfully.');
                     json_decode(printer_status_update($printer_queues_id));
                     return response()->json([
@@ -87,15 +88,14 @@ class PrinterRequestController extends Controller
         $header_id = $request->input('header_id');
         $store_id = $request->input('store_id');
         $num_of_boxes = $request->input('box_no');
-        // $printer_id = $request->input('printer_id');
-        $printer_id = "192.168.254.254";
+        $printer_ip = $request->input('printer_ip');
         $port = $request->input('port');
         $printer_queues_id = $request->input('printer_queues_id');
 
         $result = json_decode(final_store_label_print_content($header_id,$store_id,$num_of_boxes));
 
         try {
-            if ($printer_id) {
+            if ($printer_ip) {
                 for ($i = 1; $i <= $num_of_boxes; $i++) {
                     $box_count = $i . "/" . $num_of_boxes;
                     $zpl_message = "^XA" .
@@ -110,7 +110,7 @@ class PrinterRequestController extends Controller
                                     ^A0R,150,150
                                     ^FD" . $box_count . "^FS
                                     ^XZ";
-                    $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_id, $port);
+                    $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
                 }
                 session()->flash('success', 'Labels printed successfully.');
                 json_decode(printer_status_update($printer_queues_id));
