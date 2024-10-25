@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\ApiReadController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -19,5 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('store_label_print',[ApiReadController::class, 'store_label_print']);
-Route::post('final_store_label_print',[ApiReadController::class, 'final_store_label_print']);
+Route::post('api/store_label_print',[ApiController::class, 'store_label_print']);
+Route::post('api/final_store_label_print',[ApiController::class, 'final_store_label_print']);
