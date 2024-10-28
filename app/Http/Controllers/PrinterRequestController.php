@@ -13,7 +13,6 @@ class PrinterRequestController extends Controller
         $print_by_id = $request->print_by_id;
         $printer_status = $request->printer_status;
         $get_all_print_queues = json_decode(printer_queues_data($rec_date_time, $print_by_id, $printer_status), true)['data'];
-        //dd($get_all_print_queues);
         $html = '';
         if (!empty($get_all_print_queues)) {
             foreach($get_all_print_queues as $printer){

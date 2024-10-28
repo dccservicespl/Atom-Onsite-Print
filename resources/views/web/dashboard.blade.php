@@ -48,9 +48,11 @@
             <div class="card-body pb-5 pt-5">
                 <div class="row">
                     <div class="col-md-3">
+                        <label for="">Date</label>
                         <input type="date" name="rec_date_time" class="form-control">
                     </div>
                     <div class="col-md-3">
+                        <label for="">Print Request By</label>
                         <select name="print_by_id" id="" class="form-control">
                             <option value="">Select a User</option>
                             @foreach (json_decode(get_users(), true)['data'] as $get_user_data)
@@ -59,13 +61,14 @@
                         </select>
                     </div>
                     <div class="col-md-3">
+                        <label for="">Status</label>
                         <select name="printer_status" id="" class="form-control">
                             <option value="">Select a Status</option>
                             <option value="1">Success</option>
                             <option value="0">Pending</option>
                         </select>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2 d-flex align-items-end">
                         <button class="btn btn-outline-primary form-control" id="printer_filter_submit" type="submit"><i class="bi bi-funnel"></i> Filter</button>
                     </div>
                 </div>
