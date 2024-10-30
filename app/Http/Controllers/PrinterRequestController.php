@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ZplPrinterPrintHelper;
+use App\Models\PrinterQueue;
 use Exception;
 use Illuminate\Http\Request;
 
@@ -13,7 +14,11 @@ class PrinterRequestController extends Controller
         $print_by_id = $request->print_by_id;
         $printer_status = $request->printer_status;
         $get_all_print_queues = json_decode(printer_queues_data($rec_date_time, $print_by_id, $printer_status), true)['data'];
-        //dd($get_all_print_queues);
+        // $get_all_print_queues_query =
+
+        // if ($rec_date_time) {
+        //     # code...
+        // }
         $html = '';
         if (!empty($get_all_print_queues)) {
             foreach($get_all_print_queues as $printer){
@@ -127,5 +132,45 @@ class PrinterRequestController extends Controller
             return response()->json(['error' => $e->getMessage()]);
         }
 
+    }
+
+    public function printer_queue_api_check(Request $request, $recDateTime = NULL, $printById = NULL, $printStatus = NULL){
+        $get_all_print_queues = json_decode(printer_queues_data($recDateTime = NULL, $printById = NULL, $printStatus = NULL), true)['data'];
+        $get_total_data_of_printer_locally = PrinterQueue::count();
+
+        $data_difference = (count($get_all_print_queues) -  $get_total_data_of_printer_locally);
+        if ($data_difference === 1) {
+            $item = $get_all_print_queues[0];
+            $insert_data_printer_queue = new PrinterQueue();
+            $insert_data_printer_queue->store_id = $item['store_id'];
+            $insert_data_printer_queue->rec_date_time = $item['rec_date_time'];
+            $insert_data_printer_queue->print_file = $item['print_file'];
+            $insert_data_printer_queue->printer_ip_id = $item['printer_ip_id'];
+            $insert_data_printer_queue->order_header_id = $item['order_header_id'];
+            $insert_data_printer_queue->print_by_id = $item['print_by_id'];
+            $insert_data_printer_queue->page_no = $item['page_no'];
+            $insert_data_printer_queue->print_status = $item['print_status'];
+            $insert_data_printer_queue->api_end_point = $item['api_end_point'];
+            $insert_data_printer_queue->save();
+        }elseif ($data_difference > 1) {
+            PrinterQueue::query()->delete();
+            foreach($get_all_print_queues as $item){
+                $insert_data_printer_queue = new PrinterQueue();
+                $insert_data_printer_queue->store_id = $item['store_id'];
+                $insert_data_printer_queue->rec_date_time = $item['rec_date_time'];
+                $insert_data_printer_queue->print_file = $item['print_file'];
+                $insert_data_printer_queue->printer_ip_id = $item['printer_ip_id'];
+                $insert_data_printer_queue->order_header_id = $item['order_header_id'];
+                $insert_data_printer_queue->print_by_id = $item['print_by_id'];
+                $insert_data_printer_queue->page_no = $item['page_no'];
+                $insert_data_printer_queue->print_status = $item['print_status'];
+                $insert_data_printer_queue->api_end_point = $item['api_end_point'];
+                $insert_data_printer_queue->save();
+            }
+        }
+        return response()->json([
+            'response' => 201,
+            "message" => "Success"
+        ]);
     }
 }

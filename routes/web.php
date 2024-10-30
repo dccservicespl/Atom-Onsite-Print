@@ -23,6 +23,7 @@ Route::group(['middleware' => 'auth'], function(){
 
     Route::get('/store_number_label', [PrinterRequestController::class,'store_number_label'])->name('store_number_label');
     Route::get('/final_store_label', [PrinterRequestController::class,'final_store_label'])->name('final_store_label');
+    Route::get('/printer_queue_api_check', [PrinterRequestController::class,'printer_queue_api_check'])->name('printer_queue_api_check');
 
 });
 
