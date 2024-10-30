@@ -212,3 +212,35 @@ function printer_status_update($printer_queues_id = null){
         return $th->getMessage();
     }
 }
+
+function print_observer($header_id = null, $print_file = null, $printer_ip_id = null, $page_no = NULL, $store_id = null){
+    try {
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://fresh-cut-picking.demodcc.com/api/api/print_observer_api?header_id='.$header_id.'&print_file='.$print_file.'&printer_ip_id='.$printer_ip_id.'&page_no='.$page_no.'&store_id='.$store_id,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS =>'{
+            "user_id": "admindcc@yopmail.com",
+            "password": "12345678"
+        }',
+        CURLOPT_HTTPHEADER => array(
+            'user_id: admindcc@yopmail.com',
+            'password: 12345678',
+            'Content-Type: application/json'
+        ),
+        ));
+
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        echo $response;
+    } catch (\Throwable $th) {
+        return $th->getMessage();
+    }
+}

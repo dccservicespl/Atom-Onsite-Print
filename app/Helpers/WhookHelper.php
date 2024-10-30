@@ -38,4 +38,5 @@ function insert_business($user_id = NULL){
    return $insert_business_id;
 }
 
+
 ?>
