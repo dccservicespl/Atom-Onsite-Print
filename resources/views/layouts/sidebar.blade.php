@@ -77,7 +77,7 @@
                             <span class="nav-link-icon">
                                 <span class="bi-receipt-cutoff"></span>
                             </span>
-                            <span class="nav-link-text ps-1">Dashboard</span>
+                            <span class="nav-link-text ps-1">Print Dashboard</span>
                         </div>
                     </a>
                 </li>
@@ -114,7 +114,7 @@
                             <span class="nav-link-icon">
                                 <span class="fas fa-chart-pie"></span>
                             </span>
-                            <span class="nav-link-text ps-1">Dashboard</span>
+                            <span class="nav-link-text ps-1">Print Dashboard</span>
                         </div>
                     </a>
                     <a class="nav-link" href="app/calendar.html" role="button">
