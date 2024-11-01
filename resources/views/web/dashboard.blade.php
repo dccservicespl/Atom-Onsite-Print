@@ -81,7 +81,7 @@
     <div class="col-lg-12 col-xl-12 ps-lg-2 mb-3">
         <div class="card h-100">
             <div class="card-header d-flex flex-between-center bg-body-tertiary py-2">
-                <h5 class="mb-0">All Pending Prints</h5>
+                <h5 class="mb-0">Print Queues</h5>
                 <a class="py-1 fs-10 font-sans-serif btn btn-outline-primary" href="#!">View All</a>
             </div>
             <div class="card-body pb-0">
@@ -92,7 +92,7 @@
                                 <th scope="col" class="text-white">Date</th>
                                 <th scope="col" class="text-white">Print Queue</th>
                                 <th scope="col" class="text-white">No. Of Page</th>
-                                <th scope="col" class="text-white">Print Request</th>
+                                <th scope="col" class="text-white">Print Request By</th>
                                 <th scope="col" class="text-white">Status</th>
                                 <th class="text-end text-white" scope="col">Action</th>
                             </tr>
