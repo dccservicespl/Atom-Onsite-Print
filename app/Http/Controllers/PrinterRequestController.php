@@ -6,50 +6,100 @@ use App\Helpers\ZplPrinterPrintHelper;
 use App\Models\PrinterQueue;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PrinterRequestController extends Controller
 {
+    // public function printer_filter_section(Request $request){
+    //     $rec_date_time = $request->rec_date_time;
+    //     $print_by_id = $request->print_by_id;
+    //     $printer_status = $request->printer_status;
+    //     $get_all_print_queues = json_decode(printer_queues_data($rec_date_time, $print_by_id, $printer_status), true)['data'];
+    //     // $get_all_print_queues_query =
+
+    //     // if ($rec_date_time) {
+    //     //     # code...
+    //     // }
+    //     $html = '';
+    //     if (!empty($get_all_print_queues)) {
+    //         foreach($get_all_print_queues as $printer){
+    //             $html .= '<tr>
+    //                         <td>' . date('m-d-Y', strtotime($printer['rec_date_time'])) . '
+    //                         </td>
+    //                         <td>' . $printer['print_file'] . '</td>
+    //                         <td>' . $printer['page_no'] . '
+    //                         </td>
+    //                         <td>' . json_decode(get_users($printer['print_by_id']), true)['data'][0]['name'] . '
+    //                         </td>
+    //                         <td>' . generateStatusCode($printer['print_status']) . '
+    //                         </td>
+    //                         <td class="text-end">
+    //                         <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
+    //                             data-bs-placement="top" title="Print Now"
+    //                             download="Print Now" data-printer-queues-id="' . ($printer['id']) . '" data-box-no="' . ($printer['page_no']) . '" data-printer-id="' . ($printer['printer_ip_id']) . '" data-store-id="' . ($printer['store_id']) . '" data-header-id="' . ($printer['order_header_id']) . '" id="printModal" data-name="' . ($printer['print_file']) . '" data-bs-toggle="modal" data-bs-target="#printerModal">
+    //                             <i class="bi bi-printer"></i>
+    //                         </a>
+    //                     </td>
+    //                     <tr>';
+    //         }
+    //     }else{
+    //         $html = '<tr><td colspan="6"><p class="text-danger text-center h5 p-5">No data found!</p></td></tr>';
+
+    //     }
+    //     return response()->json([
+    //         'data' => $html
+    //     ]);
+
+    // }
+
     public function printer_filter_section(Request $request){
-        $rec_date_time = $request->rec_date_time;
+        $rec_date_time = $request->rec_date_time ?? date('Y-m-d');
         $print_by_id = $request->print_by_id;
         $printer_status = $request->printer_status;
-        $get_all_print_queues = json_decode(printer_queues_data($rec_date_time, $print_by_id, $printer_status), true)['data'];
-        // $get_all_print_queues_query =
-
-        // if ($rec_date_time) {
-        //     # code...
-        // }
-        $html = '';
-        if (!empty($get_all_print_queues)) {
-            foreach($get_all_print_queues as $printer){
-                $html .= '<tr>
-                            <td>' . date('m-d-Y', strtotime($printer['rec_date_time'])) . '
-                            </td>
-                            <td>' . $printer['print_file'] . '</td>
-                            <td>' . $printer['page_no'] . '
-                            </td>
-                            <td>' . json_decode(get_users($printer['print_by_id']), true)['data'][0]['name'] . '
-                            </td>
-                            <td>' . generateStatusCode($printer['print_status']) . '
-                            </td>
-                            <td class="text-end">
-                            <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
-                                data-bs-placement="top" title="Print Now"
-                                download="Print Now" data-printer-queues-id="' . ($printer['id']) . '" data-box-no="' . ($printer['page_no']) . '" data-printer-id="' . ($printer['printer_ip_id']) . '" data-store-id="' . ($printer['store_id']) . '" data-header-id="' . ($printer['order_header_id']) . '" id="printModal" data-name="' . ($printer['print_file']) . '" data-bs-toggle="modal" data-bs-target="#printerModal">
-                                <i class="bi bi-printer"></i>
-                            </a>
-                        </td>
-                        <tr>';
-            }
-        }else{
-            $html = '<tr><td colspan="6"><p class="text-danger text-center h5 p-5">No data found!</p></td></tr>';
-
+    
+        $get_printer_queues = DB::table('printer_queues')->whereDate('rec_date_time', $rec_date_time);
+    
+        if ($print_by_id) {
+            $get_printer_queues->where('print_by_id', $print_by_id);
         }
+        if (!is_null($printer_status)) {
+            $get_printer_queues->where('print_status', $printer_status);
+        }
+    
+        $get_printer_data = $get_printer_queues->orderBy('id', 'DESC')->limit(25)->get();
+    
+        $html = '';
+        if ($get_printer_data->isNotEmpty()) {
+            foreach($get_printer_data as $printer) {
+                $html .= '<tr>
+                            <td>' . date('m-d-Y', strtotime($printer->rec_date_time)) . '</td>
+                            <td>' . $printer->print_file . '</td>
+                            <td>' . $printer->page_no . '</td>
+                            <td>' . json_decode(get_users($printer->print_by_id), true)['data'][0]['name'] . '</td>
+                            <td>' . generateStatusCode($printer->print_status) . '</td>
+                            <td class="text-end">
+                                <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
+                                   data-bs-placement="top" title="Print Now"
+                                   download="Print Now" data-printer-queues-id="' . $printer->id . '" 
+                                   data-box-no="' . $printer->page_no . '" 
+                                   data-printer-id="' . $printer->printer_ip_id . '" 
+                                   data-store-id="' . $printer->store_id . '" 
+                                   data-header-id="' . $printer->order_header_id . '" 
+                                   id="printModal" data-name="' . $printer->print_file . '" 
+                                   data-bs-toggle="modal" data-bs-target="#printerModal">
+                                   <i class="bi bi-printer"></i>
+                                </a>
+                            </td>
+                        </tr>';
+            }
+        } else {
+            $html = '<tr><td colspan="6"><p class="text-danger text-center h5 p-5">No data found!</p></td></tr>';
+        }
+    
         return response()->json([
             'data' => $html
         ]);
-
-    }
+    }    
 
     public function store_number_label(Request $request){
         $header_id = $request->input('header_id');
@@ -173,4 +223,23 @@ class PrinterRequestController extends Controller
             "message" => "Success"
         ]);
     }
+
+    public function delete_printer_queues(Request $request)
+    {
+        $ids = $request->input('ids');
+
+        if ($ids) {
+            PrinterQueue::whereIn('id', $ids)->delete();
+            $result = delete_printer_queues($ids);
+        }
+
+        session()->flash('success', 'Data deleted successfully.');
+        return response()->json([
+            'success' => 'Data deleted successfully.',
+            'result' => $result,
+            'ids' => $ids
+        ], 200);
+        
+    }
+
 }
