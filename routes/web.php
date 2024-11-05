@@ -24,7 +24,8 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/store_number_label', [PrinterRequestController::class,'store_number_label'])->name('store_number_label');
     Route::get('/final_store_label', [PrinterRequestController::class,'final_store_label'])->name('final_store_label');
     Route::get('/printer_queue_api_check', [PrinterRequestController::class,'printer_queue_api_check'])->name('printer_queue_api_check');
-
+    
+    Route::get('/delete_printer_queues', [PrinterRequestController::class,'delete_printer_queues'])->name('delete_printer_queues');
 });
 
 Route::group(['middleware' => 'guest'], function () {
