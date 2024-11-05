@@ -46,12 +46,17 @@
         </div>
         <div class="col-lg-12 col-xl-12 ps-lg-2 mb-3">
             <div class="card h-100">
+                <div class="card-header bg-body-tertiary py-2 text-end">
+                    <a class="py-1 fs-10 font-sans-serif btn btn-outline-primary" href="/"> <i class="bi bi bi-arrow-clockwise"></i> Reset</a>
+                </div>
                 <div class="card-body pb-5 pt-5">
                     <div class="row">
                         <div class="col-md-3">
+                            <label for="">Date</label>
                             <input type="date" name="rec_date_time" class="form-control">
                         </div>
                         <div class="col-md-3">
+                            <label for="">Print Request By</label>
                             <select name="print_by_id" id="" class="form-control">
                                 <option value="">Select a User</option>
                                 @foreach (json_decode(get_users(), true)['data'] as $get_user_data)
@@ -60,13 +65,14 @@
                             </select>
                         </div>
                         <div class="col-md-3">
+                            <label for="">Status</label>
                             <select name="printer_status" id="" class="form-control">
                                 <option value="">Select a Status</option>
                                 <option value="1">Success</option>
                                 <option value="0">Pending</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-2 d-flex align-items-end">
                             <button class="btn btn-outline-primary form-control" id="printer_filter_submit"
                                 type="submit"><i class="bi bi-funnel"></i> Filter</button>
                         </div>
@@ -80,18 +86,24 @@
         <div class="col-lg-12 col-xl-12 ps-lg-2 mb-3">
             <div class="card h-100">
                 <div class="card-header d-flex flex-between-center bg-body-tertiary py-2">
-                    <h5 class="mb-0">All Pending Prints</h5>
-                    <a class="py-1 fs-10 font-sans-serif btn btn-outline-primary" href="/"> <i class="bi bi bi-arrow-clockwise"></i> Reload</a>
+                    <h5 class="mb-0">Printer Queues</h5>
+                    <div class="ms-auto">
+                        <!-- <a class="py-1 fs-10 font-sans-serif btn btn-outline-danger d-none" id="delete_selected"> <i class="bi bi bi-trash"></i> Delete</a>                 -->
+                        <a class="py-1 fs-10 font-sans-serif btn btn-outline-primary" href="/"> <i class="bi bi bi-arrow-clockwise"></i> Reload</a>
+                    </div>
                 </div>
                 <div class="card-body pb-0">
                     <div class="table-responsive scrollbar">
                         <table class="table table-hover table-striped overflow-hidden">
                             <thead style="background: #065fb8;">
                                 <tr>
+                                    <!-- <th scope="col" class="text-white">
+                                        <input type="checkbox" id="select_all">
+                                    </th> -->
                                     <th scope="col" class="text-white">Date</th>
                                     <th scope="col" class="text-white">Print Queue</th>
                                     <th scope="col" class="text-white">No. Of Page</th>
-                                    <th scope="col" class="text-white">Print Request</th>
+                                    <th scope="col" class="text-white">Print Request By</th>
                                     <th scope="col" class="text-white">Status</th>
                                     <th class="text-end text-white" scope="col">Action</th>
                                 </tr>
@@ -101,6 +113,9 @@
                                 @if ($get_all_print_queues->isNotEmpty())
                                     @foreach ($get_all_print_queues as $get_all_print_queues_data)
                                         <tr class="align-middle">
+                                            <!-- <td class="text-nowrap">
+                                                <input type="checkbox" class="row-checkbox" value="{{ $get_all_print_queues_data['id'] }}">
+                                            </td> -->
                                             <td class="text-nowrap">
                                                 {{ date('m-d-Y', strtotime($get_all_print_queues_data->rec_date_time)) }}
                                             </td>
@@ -133,7 +148,7 @@
                                     @endforeach
                                 @else
                                     <tr class="align-middle">
-                                        <td class="text-nowrap" colspan="6">
+                                        <td class="text-nowrap" colspan="7">
                                             <p class="text-center text-danger h5 p-5"> No data found </p>
                                         </td>
                                     </tr>
@@ -396,6 +411,67 @@
                 $('input[name="default_printer_id"]').val('');
             });
         });
+
+    //Delete printer queues data locally
+    $(document).ready(function () {
+        $('#delete_selected').addClass('d-none');
+        $('#select_all').on('click', function () {
+            $('.row-checkbox').prop('checked', this.checked);
+            toggleDeleteButton();
+        });
+
+        // If any checkbox is unchecked, uncheck the "select all" checkbox
+        $('.row-checkbox').on('click', function () {
+            toggleDeleteButton();
+            if (!$(this).prop('checked')) {
+                $('#select_all').prop('checked', false);
+            }
+            if ($('.row-checkbox:checked').length === $('.row-checkbox').length) {
+                $('#select_all').prop('checked', true);
+            }
+        });
+
+        // Delete selected records
+        $('#delete_selected').on('click', function () {
+            const ids = $('.row-checkbox:checked').map(function () {
+                return $(this).val();
+            }).get();
+
+            if (ids.length > 0) {
+                // Confirm deletion
+                if (confirm('Are you sure you want to delete this records?')) {
+                    $.ajax({
+                        url: "{{route('delete_printer_queues')}}",
+                        data: {
+                            ids: ids,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function (response) {
+                            if (response.success) {
+                                location.reload();
+                                $('#flash-message-area').load(window.location.href +
+                                    " #flash-message-area");
+                            } else {
+                                console.log('No success message in the response.');
+                            }
+                        }
+                    });
+                }
+            } else {
+                alert('Please select at least one record to delete.');
+            }
+        });
+
+        // Function to show/hide the delete button based on selected checkboxes
+        function toggleDeleteButton() {
+            if ($('.row-checkbox:checked').length > 0) {
+                $('#delete_selected').removeClass('d-none');
+            } else {
+                $('#delete_selected').addClass('d-none');
+            }
+        }
+    });
+
     </script>
 @endsection
 @endsection

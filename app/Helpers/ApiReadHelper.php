@@ -244,3 +244,34 @@ function print_observer($header_id = null, $print_file = null, $printer_ip_id = 
         return $th->getMessage();
     }
 }
+
+function delete_printer_queues($ids = null)
+{
+    try {
+        if (is_array($ids)) {
+            $ids = implode(',', $ids);
+        }
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => env('API_URL') . '/api/delete_printer_queues?ids=' . $ids,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => generate_user_id_password(),
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    } catch (\Throwable $th) {
+        return $th->getMessage();
+    }
+}
