@@ -256,13 +256,8 @@
                             printer_ip: printer_ip
                         },
                         success: function(res) {
-                            if (res.success) {
-                                $('#flash-message-area').load(window.location.href +
-                                    " #flash-message-area");
-                            } else if (res.error) {
-                                $('#flash-message-area').load(window.location.href +
-                                    " #flash-message-area");
-                            }
+                            $('#flash-message-area').load(window.location.href +" #flash-message-area");
+                            $('#flash-message-area').show();
                             $('#page-loader').addClass('d-none');
                         }
                     });

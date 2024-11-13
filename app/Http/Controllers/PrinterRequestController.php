@@ -56,18 +56,18 @@ class PrinterRequestController extends Controller
         $rec_date_time = $request->rec_date_time ?? date('Y-m-d');
         $print_by_id = $request->print_by_id;
         $printer_status = $request->printer_status;
-    
+
         $get_printer_queues = DB::table('printer_queues')->whereDate('rec_date_time', $rec_date_time);
-    
+
         if ($print_by_id) {
             $get_printer_queues->where('print_by_id', $print_by_id);
         }
         if (!is_null($printer_status)) {
             $get_printer_queues->where('print_status', $printer_status);
         }
-    
+
         $get_printer_data = $get_printer_queues->orderBy('id', 'DESC')->limit(25)->get();
-    
+
         $html = '';
         if ($get_printer_data->isNotEmpty()) {
             foreach($get_printer_data as $printer) {
@@ -80,12 +80,12 @@ class PrinterRequestController extends Controller
                             <td class="text-end">
                                 <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
                                    data-bs-placement="top" title="Print Now"
-                                   download="Print Now" data-printer-queues-id="' . $printer->id . '" 
-                                   data-box-no="' . $printer->page_no . '" 
-                                   data-printer-id="' . $printer->printer_ip_id . '" 
-                                   data-store-id="' . $printer->store_id . '" 
-                                   data-header-id="' . $printer->order_header_id . '" 
-                                   id="printModal" data-name="' . $printer->print_file . '" 
+                                   download="Print Now" data-printer-queues-id="' . $printer->id . '"
+                                   data-box-no="' . $printer->page_no . '"
+                                   data-printer-id="' . $printer->printer_ip_id . '"
+                                   data-store-id="' . $printer->store_id . '"
+                                   data-header-id="' . $printer->order_header_id . '"
+                                   id="printModal" data-name="' . $printer->print_file . '"
                                    data-bs-toggle="modal" data-bs-target="#printerModal">
                                    <i class="bi bi-printer"></i>
                                 </a>
@@ -95,11 +95,11 @@ class PrinterRequestController extends Controller
         } else {
             $html = '<tr><td colspan="6"><p class="text-danger text-center h5 p-5">No data found!</p></td></tr>';
         }
-    
+
         return response()->json([
             'data' => $html
         ]);
-    }    
+    }
 
     public function store_number_label(Request $request){
         $header_id = $request->input('header_id');
@@ -121,11 +121,16 @@ class PrinterRequestController extends Controller
                                 ^FD{$value->store_code}^FS
                                 ^XZ";
                     $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
-                    session()->flash('success', 'Labels printed successfully.');
                 }
-                json_decode(printer_status_update($printer_queues_id));
+                $message = 'Final Store Label printed successfully.';
+                session()->flash('success','Final Store Label printed successfully.');
+
+                $update_printer_status = PrinterQueue::find($printer_queues_id);
+                $update_printer_status->print_status = 1;
+                $update_printer_status->save();
+
                 return response()->json([
-                    'success' => 'Labels printed successfully',
+                    'success' => $message,
                     'print_response' => $print_response,
                     'header_id' => $header_id
                 ], 200);
@@ -185,14 +190,18 @@ class PrinterRequestController extends Controller
     }
 
     public function printer_queue_api_check(Request $request, $recDateTime = NULL, $printById = NULL, $printStatus = NULL){
-        $get_all_print_queues = json_decode(printer_queues_data($recDateTime = NULL, $printById = NULL, $printStatus = NULL), true)['data'];
-        $get_total_data_of_printer_locally = PrinterQueue::count();
+        $get_max_parent_id = PrinterQueue::max('parent_id');
 
-        $data_difference = (count($get_all_print_queues) -  $get_total_data_of_printer_locally);
-        if ($data_difference === 1) {
+        if (!$get_max_parent_id) {
+            $get_max_parent_id = 0;
+        }
+        $get_all_print_queues = json_decode(printer_queues_data($get_max_parent_id), true)['data'];
+        $record_count = count($get_all_print_queues);
+        if ($record_count>0) {
             $item = $get_all_print_queues[0];
             $insert_data_printer_queue = new PrinterQueue();
             $insert_data_printer_queue->store_id = $item['store_id'];
+            $insert_data_printer_queue->parent_id = $item['id'];
             $insert_data_printer_queue->rec_date_time = $item['rec_date_time'];
             $insert_data_printer_queue->print_file = $item['print_file'];
             $insert_data_printer_queue->printer_ip_id = $item['printer_ip_id'];
@@ -202,26 +211,19 @@ class PrinterRequestController extends Controller
             $insert_data_printer_queue->print_status = $item['print_status'];
             $insert_data_printer_queue->api_end_point = $item['api_end_point'];
             $insert_data_printer_queue->save();
-        }elseif ($data_difference > 1) {
-            PrinterQueue::query()->delete();
-            foreach($get_all_print_queues as $item){
-                $insert_data_printer_queue = new PrinterQueue();
-                $insert_data_printer_queue->store_id = $item['store_id'];
-                $insert_data_printer_queue->rec_date_time = $item['rec_date_time'];
-                $insert_data_printer_queue->print_file = $item['print_file'];
-                $insert_data_printer_queue->printer_ip_id = $item['printer_ip_id'];
-                $insert_data_printer_queue->order_header_id = $item['order_header_id'];
-                $insert_data_printer_queue->print_by_id = $item['print_by_id'];
-                $insert_data_printer_queue->page_no = $item['page_no'];
-                $insert_data_printer_queue->print_status = $item['print_status'];
-                $insert_data_printer_queue->api_end_point = $item['api_end_point'];
-                $insert_data_printer_queue->save();
-            }
+            return response()->json([
+                'response' => 201,
+                "message" => "Success",
+                "count" => $record_count
+            ]);
+        }else{
+            return response()->json([
+                'response' => 401,
+                "message" => "Error",
+                "count" => $record_count
+            ]);
         }
-        return response()->json([
-            'response' => 201,
-            "message" => "Success"
-        ]);
+
     }
 
     public function delete_printer_queues(Request $request)
@@ -239,7 +241,7 @@ class PrinterRequestController extends Controller
             'result' => $result,
             'ids' => $ids
         ], 200);
-        
+
     }
 
 }
