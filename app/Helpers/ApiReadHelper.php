@@ -14,12 +14,12 @@ function generate_user_id_password()
     return $postData;
 }
 
-function printer_queues_data($rec_date_time = NULL, $print_by_id = NULL, $print_status = NULL)
+function printer_queues_data($get_max_parent_id = 0)
 {
     try {
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => env('API_URL') . '/api/printer_queues_data?rec_date_time=' . $rec_date_time . '&print_by_id=' . $print_by_id . '&print_status=' . $print_status,
+            CURLOPT_URL => env('API_URL') . '/api/printer_queues_data?max_parent_id='.$get_max_parent_id,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
