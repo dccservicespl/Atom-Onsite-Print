@@ -1,6 +1,7 @@
 <?php
 
 use App\Mail\BusinessRegistered;
+use App\Models\PrinterQueue;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -38,5 +39,11 @@ function insert_business($user_id = NULL){
    return $insert_business_id;
 }
 
+function update_printer_ques($printerQueue_id = NULL, $status = NUll, $message = NULL){
+    $update_printer_response = PrinterQueue::find($printerQueue_id);
+    $update_printer_response->print_status = $status;
+    $update_printer_response->printer_response = $message;
+    $update_printer_response->save();
+}
 
 ?>
