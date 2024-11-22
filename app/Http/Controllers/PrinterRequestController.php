@@ -67,18 +67,25 @@ class PrinterRequestController extends Controller
         }
 
         $get_printer_data = $get_printer_queues->orderBy('id', 'DESC')->limit(25)->get();
-
         $html = '';
         if ($get_printer_data->isNotEmpty()) {
             foreach($get_printer_data as $printer) {
                 $html .= '<tr>
                             <td>' . date('m-d-Y', strtotime($printer->rec_date_time)) . '</td>
                             <td>' . $printer->print_file . '</td>
+                            <td>' . $printer->store_name . '</td>
                             <td>' . $printer->page_no . '</td>
                             <td>' . json_decode(get_users($printer->print_by_id), true)['data'][0]['name'] . '</td>
-                            <td>' . generateStatusCode($printer->print_status) . '</td>
+                            <td>' . generateStatusCode($printer->print_status, $printer->id) . '</td>
+                            <td>';
+                            if ($printer->print_status == 0) {
+                                $html .='<button class="btn btn-outline-warning printer_response_msg" data-id="'.$printer->id.'">
+                                    <i class="bi bi-bell"></i>
+                                </button>';
+                            }
+                            $html .='</td>
                             <td class="text-end">
-                                <a class="btn btn-tertiary border-300 btn-sm me-1 text-600 text-end"
+                                <a class="btn btn-outline-primary"
                                    data-bs-placement="top" title="Print Now"
                                    download="Print Now" data-printer-queues-id="' . $printer->id . '"
                                    data-box-no="' . $printer->page_no . '"
@@ -93,7 +100,7 @@ class PrinterRequestController extends Controller
                         </tr>';
             }
         } else {
-            $html = '<tr><td colspan="6"><p class="text-danger text-center h5 p-5">No data found!</p></td></tr>';
+            $html = '<tr><td colspan="8"><p class="text-400 text-center h2 p-5">No data found!</p></td></tr>';
         }
 
         return response()->json([
@@ -124,11 +131,7 @@ class PrinterRequestController extends Controller
                 }
                 $message = 'Final Store Label printed successfully.';
                 session()->flash('success','Final Store Label printed successfully.');
-
-                $update_printer_status = PrinterQueue::find($printer_queues_id);
-                $update_printer_status->print_status = 1;
-                $update_printer_status->save();
-
+                update_printer_ques($printer_queues_id, 1, "Final Store Label printed successfully.");
                 return response()->json([
                     'success' => $message,
                     'print_response' => $print_response,
@@ -138,9 +141,10 @@ class PrinterRequestController extends Controller
                 session()->flash('error', 'No Printer found.');
                 return response()->json(['error' => "No Printer found."]);
             }
-        } catch (Exception $e) {
-            session()->flash('error', $e->getMessage());
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (\Throwable $th) {
+            update_printer_ques($printer_queues_id, 0, $th->getMessage());
+            session()->flash('error', $th->getMessage());
+            return response()->json(['error' => $th->getMessage()]);
         }
     }
 
@@ -172,8 +176,8 @@ class PrinterRequestController extends Controller
                                     ^XZ";
                     $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
                 }
+                update_printer_ques($printer_queues_id, 1, "Labels printed successfully");
                 session()->flash('success', 'Labels printed successfully.');
-                json_decode(printer_status_update($printer_queues_id));
                 return response()->json([
                     'success' => 'Labels printed successfully',
                     'print_response' => $print_response,
@@ -182,11 +186,11 @@ class PrinterRequestController extends Controller
                 session()->flash('error', 'No Printer found.');
                 return response()->json(['error' => "No Printer found."]);
             }
-        } catch (Exception $e) {
-            session()->flash('error', $e->getMessage());
-            return response()->json(['error' => $e->getMessage()]);
+        } catch (\Throwable $th) {
+            update_printer_ques($printer_queues_id, 0, $th->getMessage());
+            session()->flash('error', $th->getMessage());
+            return response()->json(['error' => $th->getMessage()]);
         }
-
     }
 
     public function printer_queue_api_check(Request $request, $recDateTime = NULL, $printById = NULL, $printStatus = NULL){
@@ -196,6 +200,8 @@ class PrinterRequestController extends Controller
             $get_max_parent_id = 0;
         }
         $get_all_print_queues = json_decode(printer_queues_data($get_max_parent_id), true)['data'];
+        // dd($get_all_print_queues);
+
         $record_count = count($get_all_print_queues);
         if ($record_count>0) {
             $item = $get_all_print_queues[0];
@@ -210,6 +216,7 @@ class PrinterRequestController extends Controller
             $insert_data_printer_queue->page_no = $item['page_no'];
             $insert_data_printer_queue->print_status = $item['print_status'];
             $insert_data_printer_queue->api_end_point = $item['api_end_point'];
+            $insert_data_printer_queue->store_name = $item['store_name'];
             $insert_data_printer_queue->save();
             return response()->json([
                 'response' => 201,
@@ -226,8 +233,7 @@ class PrinterRequestController extends Controller
 
     }
 
-    public function delete_printer_queues(Request $request)
-    {
+    public function delete_printer_queues(Request $request){
         $ids = $request->input('ids');
 
         if ($ids) {
@@ -242,6 +248,15 @@ class PrinterRequestController extends Controller
             'ids' => $ids
         ], 200);
 
+    }
+
+    public function show_printer_response_msg($id = NULL){
+        $get_printer_response_msg = PrinterQueue::where('id', $id)->first()->printer_response;
+        return response()->json([
+            'response' => 200,
+            'message' => "Seccess",
+            'data' => $get_printer_response_msg
+        ]);
     }
 
 }

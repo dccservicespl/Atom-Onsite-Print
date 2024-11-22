@@ -31,7 +31,7 @@ class AdminAuthController extends Controller
     }
 
     public function dashboard(){
-        $get_all_print_queues = PrinterQueue::whereDate('rec_date_time',date('Y-m-d'))->orderBy('id', 'DESC')->get();
+        $get_all_print_queues = PrinterQueue::whereDate('rec_date_time', date('Y-m-d'))->orderBy('id', 'DESC')->get();
         $get_all_printers = json_decode(printer_list(),true)['data'];
         return view('web.dashboard', compact('get_all_print_queues','get_all_printers'));
     }

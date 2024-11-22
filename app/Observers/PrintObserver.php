@@ -12,6 +12,7 @@ class PrintObserver
      * Handle the PrinterQueue "created" event.
      */
     public function created(PrinterQueue $printerQueue): void {
+        // dd($printerQueue);
         // $printer_queue_print = json_decode(print_observer($printerQueue->order_header_id, $printerQueue->print_file, $printerQueue->printer_ip_id, $printerQueue->page_no, $printerQueue->store_id), true);
         $printer_queue_print = Http::withHeaders([
             'Content-Type' => 'application/json',
@@ -37,11 +38,15 @@ class PrintObserver
                     $print_response = ZplPrinterPrintHelper::ZplPrintPrint($zpl_message, $printer_ip, $port);
                     $update_printer_status = PrinterQueue::find($printerQueue->id);
                     $update_printer_status->print_status = 1;
+                    $update_printer_status->printer_response = "Labels printed successfully.";
                     $update_printer_status->save();
                     session()->flash('success', 'Labels printed successfully.');
                     $message = 'Store Number Label printed successfully.';
                 }
             } catch (\Throwable $th) {
+                $update_printer_response = PrinterQueue::find($printerQueue->id);
+                $update_printer_response->printer_response = $th->getMessage();
+                $update_printer_response->save();
                 $message = 'Store Number Label printed response:'.$th->getMessage();
             }
 
@@ -71,8 +76,12 @@ class PrintObserver
                 $message = 'Final Store Label printed successfully.';
                 $update_printer_status = PrinterQueue::find($printerQueue->id);
                 $update_printer_status->print_status = 1;
+                $update_printer_status->printer_response = "Final Store Label printed successfully.";
                 $update_printer_status->save();
             } catch (\Throwable $th) {
+                $update_printer_response = PrinterQueue::find($printerQueue->id);
+                $update_printer_response->printer_response = $th->getMessage();
+                $update_printer_response->save();
                 $message = 'Final Store Label printed response:'.$th->getMessage();
             }
         }

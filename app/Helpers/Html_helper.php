@@ -1,19 +1,19 @@
 <?php
 
-    function generateStatusCode($status = NULL){
+    function generateStatusCode($status = NULL, $printer_queues_id = NULL){
         $output = '';
         if ($status === 0) {
             $output .= '
-                <span class="badge badge rounded-pill d-block p-2 badge-subtle-danger border border-danger">Pending</span>
+                <span class="printer_queues_id badge badge rounded-pill d-block p-2 badge-subtle-danger border border-danger" data-id="'.$printer_queues_id.'">Pending</span>
             ';
         }elseif($status === 1){
             $output .= '
-                <span class="badge badge rounded-pill d-block p-2 badge-subtle-success border border-success">Success
+                <span class="printer_queues_id badge badge rounded-pill d-block p-2 badge-subtle-success border border-success" data-id="'.$printer_queues_id.'">Success
                 </span>
             ';
         }else{
             $output .='
-                <span class="badge badge rounded-pill d-block p-2 badge-subtle-secondary border border-secondary">On Hold
+                <span class="printer_queues_id badge badge rounded-pill d-block p-2 badge-subtle-secondary border border-secondary" data-id="'.$printer_queues_id.'">On Hold
                 </span>
             ';
         }
